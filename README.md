@@ -3,14 +3,14 @@ Un sistema multi-agente adk que razona, genera y estructura un sistema multi-age
 
 ## Ejecucion
 
-Para el ejemplo de un agente:
-cd bdi_agent_example
-py -m pip install -r requirements.txt
-
-cd carpeta parent/bdi_agent_example
-adk web
-
-(prompts en web):
-"Crea un sistema multiagente donde un agente envía "ping" y otro responde "pong"."
-"Crea un sistema multiagente donde un agente imprima la serie de Fibonacci hasta N."
-"Crea un sistema multiagente de subasta holandesa con un subastador y varios compradores."
+Para el ejemplo de un agente:<br />
+cd bdi_agent_example<br />
+py -m pip install -r requirements.txt<br />
+<br />
+cd carpeta parent/bdi_agent_example<br />
+adk web<br />
+<br />
+(prompts en web):<br />
+"Crea un sistema multiagente donde un agente envía "ping" y otro responde "pong"."<br />
+"Crea un sistema multiagente donde un agente imprima la serie de Fibonacci hasta N."<br />
+"Crea un sistema multiagente de subasta holandesa con un subastador y varios compradores."<br />
