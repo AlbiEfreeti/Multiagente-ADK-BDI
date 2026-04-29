@@ -8,7 +8,13 @@ import os
 from pathlib import Path
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
-from . import rag   
+from . import rag  
+
+##Importamos los 3 tipos de agentes  
+from google.adk.agents import SequentialAgent
+from google.adk.agents import ParallelAgent
+from google.adk.agents import LoopAgent
+
 #from rag import consultar_documentacion 
 
 
@@ -242,6 +248,33 @@ model = LiteLlm(
     api_key="sk-LFXs1kjaSxtEDgOMlPUOpA"
 )
 
+
+
+###Definimos los agentes individuales###
+
+
+
+###Agrupamos agentes individuales###
+## ParallelAgent
+investigacion_paralela = ParallelAgent(
+    name="investigador_dual",
+    sub_agents=[agente_github, agente_rag]
+)
+
+## LoopAgent
+bucle_correccion = LoopAgent(
+    name="refinador_codigo",
+    sub_agents=[coder_agent, tester_agent],
+    max_iterations=5 # Para evitar bucles infinitos 
+)
+
+## SequentialAgent
+bdi_mas = SequentialAgent(
+    name="generador_bdi_completo",
+    sub_agents=[investigacion_paralela, bucle_correccion, saver_agent]
+)
+
+""""
 root_agent = LlmAgent(
     name="BDI_Developer",
     model=model,
@@ -278,5 +311,5 @@ root_agent = LlmAgent(
         "12. CATASTROFE DE SINTAXIS (MUY IMPORTANTE): Al usar las herramientas, SIEMPRE debes usar estrictamente el nombre técnico exacto ('search_github_examples', 'search_local_docs', 'test_mas_code', 'save_mas_code'). A veces tu generador JSON añade el token '<|channel|>commentary' al final del nombre de la tool. ESTO PROVOCA UN ERROR FATAL. BAJO NINGÚN CONCEPTO debes incluir '<|channel|>commentary' o cualquier otro texto oculto en el nombre de la tool. Limítate a generar el nombre en minúsculas y tal cual es."
     ),
     tools=[search_github_examples, rag.search_local_docs, test_mas_code, save_mas_code]
-)
+)"""
 
