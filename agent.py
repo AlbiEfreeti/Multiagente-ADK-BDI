@@ -21,8 +21,8 @@ from google.adk.agents import LoopAgent
 OUTPUT_DIR = Path("output")
 OUTPUT_DIR.mkdir(exist_ok=True)
 
-MAX_RETRIES = 5
-current_retries = 0
+#MAX_RETRIES = 5
+#current_retries = 0
 best_mas_state = {}
 best_error_count = float('inf')
 
@@ -251,8 +251,47 @@ model = LiteLlm(
 
 
 ###Definimos los agentes individuales###
+##Para el parallelAgent definimos a sus agentes##
+agente_github = LlmAgent(
+    name="GitHub_Expert",
+    model=model,
+    instruction="Tu tarea es buscar ejemplos de código JASON/AgentSpeak en GitHub para resolver el problema del usuario. Extrae patrones de diseño útiles.",
+    tools=[search_github_examples]
+)
 
+agente_rag = LlmAgent(
+    name="Docs_Expert",
+    model=model,
+    instruction="Tu tarea es consultar la documentación local de Jason. Busca reglas de sintaxis, cómo declarar creencias y planes correctamente.",
+    tools=[search_github_examples]
+)
 
+##Para el LoopAgent definimos a sus agentes##
+coder_agent = LlmAgent(
+    name="Jason_Coder",
+    model=model,
+    output_key="jason_project_code",
+    instruction=(
+        "Eres un programador experto en BDI. Usa la información de los investigadores para escribir un .mas2j y los .asl. "
+        "Sigue estrictamente las reglas de sintaxis: variables en Mayúscula, puntos al final de cada plan y MAS en mayúsculas."
+    )
+)
+
+tester_agent = LlmAgent(
+    name="Code_Tester",
+    model=model,
+    output_key="last_error",
+    instruction="Tu única función es ejecutar el código recibido usando la herramienta de test. Si hay errores (STDERR), lánzalos para que el programador los corrija.",
+    tools=[test_mas_code]
+)
+
+##Para el SequentialAgent definimos a su agente##
+saver_agent = LlmAgent(
+    name="Project_Saver",
+    model=model,
+    instruction="Tu tarea es guardar el proyecto final que ha sido validado. Usa la herramienta save_mas_code para persistirlo en la carpeta output.",
+    tools=[save_mas_code]
+)
 
 ###Agrupamos agentes individuales###
 ## ParallelAgent
