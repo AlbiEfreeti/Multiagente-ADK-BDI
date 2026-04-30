@@ -274,16 +274,13 @@ coder_agent = LlmAgent(
     model=model,
     output_key="jason_project_code",
     instruction=(
-        """DEVUELVE SIEMPRE EXACTAMENTE ESTE FORMATO:
-
-        MAS2J:
-        ...
-
-        AGENTS:
-        nombre.asl:
-        ...
-
-        NO añadas explicaciones ni texto extra."""
+        "Eres un programador BDI experto. Diseña un .mas2j y los .asl usando la investigación: {github_docs} y {local_docs}.\n"
+        "REGLAS CRÍTICAS DE SINTAXIS:\n"
+        "1. .mas2j: Usa 'MAS' en mayúsculas e infraestructura Centralised.\n"
+        "2. .asl: Variables en Mayúscula, átomos en minúscula.\n"
+        "3. PUNTUACIÓN: TODOS los planes y creencias deben terminar con PUNTO FINAL (.).\n"
+        "4. Incluye siempre un objetivo inicial '!start.' y un plan de contingencia '+!meta(_) <- .print(\"error\").'.\n"
+        "Si recibes errores en {last_error}, corrígelos inmediatamente."
     )
 )
 
@@ -291,23 +288,8 @@ tester_agent = LlmAgent(
     name="Code_Tester",
     model=model,
     output_key="last_error",
-    instruction="""
-Recibes código en este formato:
-
-{jason_project_code}
-
-Extrae:
-- MAS2J
-- AGENTS
-
-Si todo parece correcto responde:
-STATUS: OK
-
-Si hay errores:
-STATUS: ERROR
-Explica brevemente el error.
-"""
-    #tools=[test_mas_code]
+    instruction="Valida el código en {jason_project_code} usando test_mas_code.",
+    tools=[test_mas_code]
 )
 
 ##Para el SequentialAgent definimos a su agente##
