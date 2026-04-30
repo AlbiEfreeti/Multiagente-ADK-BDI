@@ -256,7 +256,7 @@ agente_github = LlmAgent(
     name="GitHub_Expert",
     model=model,
     output_key="github_docs",
-    instruction="Busca ejemplos en GitHub para resolver el prompt del usuario: {input}.",
+    instruction="Busca ejemplos en GitHub para resolver el prompt del usuario.",
     tools=[search_github_examples]
 )
 
@@ -264,7 +264,7 @@ agente_rag = LlmAgent(
     name="Docs_Expert",
     model=model,
     output_key="local_docs",
-    instruction="Consulta la documentación local sobre el prompt: {input}.",
+    instruction="Consulta la documentación local sobre el prompt del usuario.",
     tools=[rag.search_local_docs]
 )
 
@@ -274,13 +274,16 @@ coder_agent = LlmAgent(
     model=model,
     output_key="jason_project_code",
     instruction=(
-        "Eres un programador BDI experto. Diseña un .mas2j y los .asl usando la investigación: {github_docs} y {local_docs}.\n"
-        "REGLAS CRÍTICAS DE SINTAXIS:\n"
-        "1. .mas2j: Usa 'MAS' en mayúsculas e infraestructura Centralised.\n"
-        "2. .asl: Variables en Mayúscula, átomos en minúscula.\n"
-        "3. PUNTUACIÓN: TODOS los planes y creencias deben terminar con PUNTO FINAL (.).\n"
-        "4. Incluye siempre un objetivo inicial '!start.' y un plan de contingencia '+!meta(_) <- .print(\"error\").'.\n"
-        "Si recibes errores en {last_error}, corrígelos inmediatamente."
+        """DEVUELVE SIEMPRE EXACTAMENTE ESTE FORMATO:
+
+        MAS2J:
+        ...
+
+        AGENTS:
+        nombre.asl:
+        ...
+
+        NO añadas explicaciones ni texto extra."""
     )
 )
 
@@ -288,8 +291,23 @@ tester_agent = LlmAgent(
     name="Code_Tester",
     model=model,
     output_key="last_error",
-    instruction="Valida el código en {jason_project_code} usando test_mas_code.",
-    tools=[test_mas_code]
+    instruction="""
+Recibes código en este formato:
+
+{jason_project_code}
+
+Extrae:
+- MAS2J
+- AGENTS
+
+Si todo parece correcto responde:
+STATUS: OK
+
+Si hay errores:
+STATUS: ERROR
+Explica brevemente el error.
+"""
+    #tools=[test_mas_code]
 )
 
 ##Para el SequentialAgent definimos a su agente##
@@ -320,14 +338,5 @@ bdi_mas = SequentialAgent(
     sub_agents=[investigacion_paralela, bucle_correccion, saver_agent]
 )
 
-# Al final de tu archivo agent.py, después de definir bdi_mas
-# No uses bloques 'if main', solo define este agente:
 
-root_agent = LlmAgent(
-    name="BDI_Runner",
-    model=model,
-    instruction="Eres el coordinador. Pasa la solicitud del usuario: {input} al sistema bdi_mas y devuelve el resultado.",
-    # Importante: Algunos entornos prefieren que el SequentialAgent sea una tool 
-    # o que se pase directamente a la web.
-)
 
