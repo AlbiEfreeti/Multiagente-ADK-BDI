@@ -206,7 +206,7 @@ def save_mas_code(mas_name: str, mas2j_code: str = "", agents_dict: dict = None)
     Args:
         mas_name: Nombre del proyecto (se usará para la subcarpeta en 'output' y el archivo .mas2j).
     """
-    global current_retries, best_mas_state, best_error_count
+    global best_mas_state, best_error_count
     
     if agents_dict is None:
         agents_dict = {}
@@ -232,7 +232,7 @@ def save_mas_code(mas_name: str, mas2j_code: str = "", agents_dict: dict = None)
             (project_dir / filename).write_text(str(content), encoding="utf-8")
         
         # Resetear estado para próximas llamadas del usuario
-        current_retries = 0
+        
         best_mas_state = {}
         best_error_count = float('inf')
         
@@ -265,7 +265,7 @@ agente_rag = LlmAgent(
     model=model,
     output_key="local_docs",
     instruction="Consulta la documentación local sobre el prompt: {user_prompt}.",
-    tools=[search_github_examples]
+    tools=[rag.search_local_docs]
 )
 
 ##Para el LoopAgent definimos a sus agentes##
@@ -274,8 +274,12 @@ coder_agent = LlmAgent(
     model=model,
     output_key="jason_project_code",
     instruction=(
-        "Eres un experto en BDI. Diseña el .mas2j y los .asl basados en la investigación: "
-        "{github_docs} y {local_docs}. " 
+        "Eres un programador BDI experto. Diseña un .mas2j y los .asl usando la investigación: {github_docs} y {local_docs}.\n"
+        "REGLAS CRÍTICAS DE SINTAXIS:\n"
+        "1. .mas2j: Usa 'MAS' en mayúsculas e infraestructura Centralised.\n"
+        "2. .asl: Variables en Mayúscula, átomos en minúscula.\n"
+        "3. PUNTUACIÓN: TODOS los planes y creencias deben terminar con PUNTO FINAL (.).\n"
+        "4. Incluye siempre un objetivo inicial '!start.' y un plan de contingencia '+!meta(_) <- .print(\"error\").'.\n"
         "Si recibes errores en {last_error}, corrígelos inmediatamente."
     )
 )
