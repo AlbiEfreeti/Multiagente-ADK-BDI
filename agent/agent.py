@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
-from . import rag  
+import rag  
 
 ##Importamos los 3 tipos de agentes  
 from google.adk.agents import SequentialAgent
@@ -256,7 +256,7 @@ agente_github = LlmAgent(
     name="GitHub_Expert",
     model=model,
     output_key="github_docs",
-    instruction="Busca ejemplos en GitHub para resolver el prompt del usuario: {user_prompt}.",
+    instruction="Busca ejemplos en GitHub para resolver el prompt del usuario: {input}.",
     tools=[search_github_examples]
 )
 
@@ -264,7 +264,7 @@ agente_rag = LlmAgent(
     name="Docs_Expert",
     model=model,
     output_key="local_docs",
-    instruction="Consulta la documentación local sobre el prompt: {user_prompt}.",
+    instruction="Consulta la documentación local sobre el prompt: {input}.",
     tools=[rag.search_local_docs]
 )
 
