@@ -320,42 +320,14 @@ bdi_mas = SequentialAgent(
     sub_agents=[investigacion_paralela, bucle_correccion, saver_agent]
 )
 
-""""
+# Al final de tu archivo agent.py, después de definir bdi_mas
+# No uses bloques 'if main', solo define este agente:
+
 root_agent = LlmAgent(
-    name="BDI_Developer",
+    name="BDI_Runner",
     model=model,
-    description="Agente experto en desarrollador proyectos Multi-Agente BDI en Jason",
-    instruction=(
-        "Eres un agente experto programador en AgentSpeak y Jason, orientado a sistemas Multi-Agente BDI (Belief-Desire-Intention). "
-        "Tu objetivo es crear proyectos MAS completos que cumplan con las especificaciones del usuario.\n\n"
-        "INSTRUCCIONES CRÍTICAS:\n"
-        "1. Analiza lo que pide el usuario y diseña la estructura del sistema: un archivo de configuración .mas2j y uno o más agentes en archivos .asl.\n"
-        "2. IMPORTANTE SINTAXIS .mas2j: El archivo de configuración DEBE seguir estrictamente esta estructura:\n"
-        "   MAS nombre_proyecto {\n"
-        "       infrastructure: Centralised\n"
-        "       agents:\n"
-        "           nombre_agente_1;\n"
-        "           nombre_agente_2 #3; /* Si necesitas instanciar 3 copias */\n"
-        "   }\n"
-        "   REGLAS MAS2J: Usa 'MAS' en mayúsculas. NO pongas la extensión '.asl' en la lista de agentes. Acaba cada declaración de agente con punto y coma (;).\n"
-        "3. IMPORTANTE SINTAXIS AGENTSPEAK (.asl):\n"
-        "   - Las creencias y objetivos se deben declarar al principio del fichero, antes de los planes.\n"
-        "   - Las variables DEBEN empezar con letra Mayúscula (ej. PosX). Los átomos y literales con minúscula (ej. mesa).\n"
-        "   - Para poder operar con un valor de una creencia hay que intanciarlo siempre primero en una variable.\n"
-        "   - El formato estricto de un plan es: +!meta(Arg) : contexto <- accion1; accion2. ¡ATENCIÓN: TODOS los planes y creencias DEBEN terminar obligatoriamente con un PUNTO FINAL (.)!\n"
-        "   - ¡Evita el error 'No plan for event'! Debes añadir SIEMPRE un plan de contingencia genérico por si falla el contexto: +!meta(_) <- .print(\"Fallo en \", meta).\n"
-        "   - Las internal actions nativas de Jason siempre llevan un punto delante (ej. .print(\"Hola\"); .wait(1000);) y recuerda cerrar el plan con PUNTO (.).\n"
-        "   - Para iniciar la ejecución debes añadir una creencia o un objetivo inicial en el agente que inicie el sistema. Por ejemplo: DEBES poner \"!start.\" para poder ejecutar al inicio el plan \"+!start <- accion. \" \n"
-        "4. Si necesitas inspiración o código de ejemplo, utiliza la herramienta 'search_github_examples(path)'.\n"
-        "5. Si necesitas teoría técnica, tutoriales o sintaxis de Programación BDI, usa 'search_local_docs(query)'.\n"
-        "6. REGLA PROHIBITIVA ESTRICTA: ESTÁ TOTALMENTE PROHIBIDO DEVOLVER EL CÓDIGO FINAL DE JASON DIRECTAMENTE EN LA RESPUESTA DE TEXTO (MARKDOWN).\n"
-        "7. PASO 1 (INVESTIGACIÓN OBLIGATORIA): ANTES de proponer ningún código, ESTÁS OBLIGADO a llamar a la herramienta 'search_local_docs(query)'. Debes buscar en la teoría oficial cómo se implementa lo que el usuario pide.\n"
-        "8. PASO 2 (Verificación Práctica): Tras investigar y diseñar el código mentalmente, LLAMA SÍ O SÍ a 'test_mas_code(mas2j_code, agents_dict)' para probar si el sistema compila.\n"
-        "9. PASO 3 (Corrección Iterativa): Si 'test_mas_code' falla, lee la excepción devuelta en el log, modifica tu código y vuelve a ejecutar 'test_mas_code' (límite de 5 intentos).\n"
-        "10. PASO 4 (Guardado Final): Únicamente cuando la prueba no dé errores o agotes tus intentos, estás OBLIGADO a llamar a 'save_mas_code(mas_name, mas2j_code, agents_dict)' para persistir el proyecto.\n"
-        "11. PASO 5 (Notificar al usuario): Informa del éxito de la creación y da un breve resumen.\n"
-        "12. CATASTROFE DE SINTAXIS (MUY IMPORTANTE): Al usar las herramientas, SIEMPRE debes usar estrictamente el nombre técnico exacto ('search_github_examples', 'search_local_docs', 'test_mas_code', 'save_mas_code'). A veces tu generador JSON añade el token '<|channel|>commentary' al final del nombre de la tool. ESTO PROVOCA UN ERROR FATAL. BAJO NINGÚN CONCEPTO debes incluir '<|channel|>commentary' o cualquier otro texto oculto en el nombre de la tool. Limítate a generar el nombre en minúsculas y tal cual es."
-    ),
-    tools=[search_github_examples, rag.search_local_docs, test_mas_code, save_mas_code]
-)"""
+    instruction="Eres el coordinador. Pasa la solicitud del usuario: {input} al sistema bdi_mas y devuelve el resultado.",
+    # Importante: Algunos entornos prefieren que el SequentialAgent sea una tool 
+    # o que se pase directamente a la web.
+)
 
