@@ -1,0 +1,17 @@
+# Bases de datos temporales de ADK
+session.db
+__data__/
+*.db
+
+# Entorno virtual y dependencias
+venv/
+.venv/
+__pycache__/
+*.pyc
+
+# Configuración sensible (¡MUY IMPORTANTE NO SUBIR ESTO!)
+.env
+
+# Archivos temporales de Jason
+temp_mas_project/
+output/
