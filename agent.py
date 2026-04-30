@@ -100,7 +100,7 @@ def search_github_examples(path: str = "") -> str:
     except Exception as e:
         return f"Error al intentar acceder a los ejemplos: {e}"
 
-def test_mas_code(mas2j_code: str, agents_dict: dict) -> str:
+def test_mas_code(mas2j_code: str, agents_dict: dict, intento: int = 1) -> str:
     """
     Guarda y ejecuta el código en un directorio temporal para probar el sistema Multi-Agente usando jason.
     NO guarda los archivos definitivamente, solo devuelve la salida para que verifiques si funciona.
@@ -111,12 +111,12 @@ def test_mas_code(mas2j_code: str, agents_dict: dict) -> str:
         agents_dict: Un diccionario donde la clave es el nombre del archivo (ej. "agent1.asl") 
                      y el valor es el contenido de ese archivo .asl.
     """
-    global current_retries, best_mas_state, best_error_count
+    global best_mas_state, best_error_count
     
-    if current_retries >= MAX_RETRIES:
-         return f"ERROR: Has superado el límite de {MAX_RETRIES} intentos. Por favor, utiliza 'save_mas_code' para guardar el último código de inmediato y termina tu respuesta."
+    #if current_retries >= MAX_RETRIES:
+    #     return f"ERROR: Has superado el límite de {MAX_RETRIES} intentos. Por favor, utiliza 'save_mas_code' para guardar el último código de inmediato y termina tu respuesta."
          
-    current_retries += 1
+    #current_retries += 1
     
     temp_dir = Path("temp_mas_project")
     
@@ -166,7 +166,7 @@ def test_mas_code(mas2j_code: str, agents_dict: dict) -> str:
             }
             
         # Format output
-        output = f"=== EJECUCIÓN DE PRUEBA (Intento {current_retries}/{MAX_RETRIES}) ===\nReturn code: {result.returncode}\n"
+        output = f"=== EJECUCIÓN DE PRUEBA (Intento {intento}/5) ===\nReturn code: {result.returncode}\n"
         if result.stdout:
             output += f"--- STDOUT ---\n{result.stdout}\n"
         if result.stderr:
@@ -182,7 +182,7 @@ def test_mas_code(mas2j_code: str, agents_dict: dict) -> str:
                 "agents": agents_dict
             }
             
-        output = f"=== EJECUCIÓN DE PRUEBA (Intento {current_retries}/{MAX_RETRIES}) ===\n"
+        output = f"=== EJECUCIÓN DE PRUEBA (Intento {intento}/5) ===\n"
         output += "AVISO: La ejecución alcanzó el tiempo límite (15s). Esto es normal si Jason arranca una interfaz y no finaliza solo.\n"
         if hasattr(e, 'stdout') and e.stdout:
             stdout_str = e.stdout.decode('utf-8') if isinstance(e.stdout, bytes) else e.stdout
@@ -255,14 +255,16 @@ model = LiteLlm(
 agente_github = LlmAgent(
     name="GitHub_Expert",
     model=model,
-    instruction="Tu tarea es buscar ejemplos de código JASON/AgentSpeak en GitHub para resolver el problema del usuario. Extrae patrones de diseño útiles.",
+    output_key="github_docs",
+    instruction="Busca ejemplos en GitHub para resolver el prompt del usuario: {user_prompt}.",
     tools=[search_github_examples]
 )
 
 agente_rag = LlmAgent(
     name="Docs_Expert",
     model=model,
-    instruction="Tu tarea es consultar la documentación local de Jason. Busca reglas de sintaxis, cómo declarar creencias y planes correctamente.",
+    output_key="local_docs",
+    instruction="Consulta la documentación local sobre el prompt: {user_prompt}.",
     tools=[search_github_examples]
 )
 
@@ -272,8 +274,9 @@ coder_agent = LlmAgent(
     model=model,
     output_key="jason_project_code",
     instruction=(
-        "Eres un programador experto en BDI. Usa la información de los investigadores para escribir un .mas2j y los .asl. "
-        "Sigue estrictamente las reglas de sintaxis: variables en Mayúscula, puntos al final de cada plan y MAS en mayúsculas."
+        "Eres un experto en BDI. Diseña el .mas2j y los .asl basados en la investigación: "
+        "{github_docs} y {local_docs}. " 
+        "Si recibes errores en {last_error}, corrígelos inmediatamente."
     )
 )
 
@@ -281,7 +284,7 @@ tester_agent = LlmAgent(
     name="Code_Tester",
     model=model,
     output_key="last_error",
-    instruction="Tu única función es ejecutar el código recibido usando la herramienta de test. Si hay errores (STDERR), lánzalos para que el programador los corrija.",
+    instruction="Valida el código en {jason_project_code} usando test_mas_code.",
     tools=[test_mas_code]
 )
 
@@ -289,7 +292,7 @@ tester_agent = LlmAgent(
 saver_agent = LlmAgent(
     name="Project_Saver",
     model=model,
-    instruction="Tu tarea es guardar el proyecto final que ha sido validado. Usa la herramienta save_mas_code para persistirlo en la carpeta output.",
+    instruction="Usa save_mas_code para guardar el proyecto final validado en {jason_project_code}.",
     tools=[save_mas_code]
 )
 
