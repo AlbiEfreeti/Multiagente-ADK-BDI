@@ -315,7 +315,7 @@ bucle_correccion = LoopAgent(
 )
 
 ## SequentialAgent
-bdi_mas = SequentialAgent(
+root_agent = SequentialAgent(
     name="generador_bdi_completo",
     sub_agents=[investigacion_paralela, bucle_correccion, saver_agent]
 )
