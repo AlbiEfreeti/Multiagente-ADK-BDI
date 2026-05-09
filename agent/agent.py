@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 from google.adk.agents import LlmAgent
 from google.adk.models.lite_llm import LiteLlm
-import rag  
+from . import rag 
 
 ##Importamos los 3 tipos de agentes  
 from google.adk.agents import SequentialAgent
