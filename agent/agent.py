@@ -268,27 +268,38 @@ agente_rag = LlmAgent(
     tools=[rag.search_local_docs]
 )
 
+##Barrera para antes de los agentes del loop agent##
+fusion_agent = LlmAgent(
+    name="Context_Fusion",
+    model=model,
+    output_key="context_ready",
+    instruction="""
+    Espera a que existan github_docs y local_docs.
+    Si existen, combínalos en un resumen útil.
+    """
+)
+
 ##Para el LoopAgent definimos a sus agentes##
 coder_agent = LlmAgent(
     name="Jason_Coder",
     model=model,
     output_key="jason_project_code",
     instruction=(
-        "Eres un programador BDI experto. Diseña un .mas2j y los .asl usando la investigación: {github_docs} y {local_docs}.\n"
+        "Eres un programador BDI experto. Diseña un .mas2j y los .asl.\n"
+        "Usa la información de investigación disponible si existe.\n\n"
         "REGLAS CRÍTICAS DE SINTAXIS:\n"
         "1. .mas2j: Usa 'MAS' en mayúsculas e infraestructura Centralised.\n"
         "2. .asl: Variables en Mayúscula, átomos en minúscula.\n"
         "3. PUNTUACIÓN: TODOS los planes y creencias deben terminar con PUNTO FINAL (.).\n"
         "4. Incluye siempre un objetivo inicial '!start.' y un plan de contingencia '+!meta(_) <- .print(\"error\").'.\n"
-        "Si recibes errores en {last_error}, corrígelos inmediatamente."
     )
 )
 
 tester_agent = LlmAgent(
     name="Code_Tester",
     model=model,
-    output_key="last_error",
-    instruction="Valida el código en {jason_project_code} usando test_mas_code.",
+    output_key="test_result",
+    instruction="Valida el código usando test_mas_code.",
     tools=[test_mas_code]
 )
 
@@ -296,7 +307,7 @@ tester_agent = LlmAgent(
 saver_agent = LlmAgent(
     name="Project_Saver",
     model=model,
-    instruction="Usa save_mas_code para guardar el proyecto final validado en {jason_project_code}.",
+    instruction="Usa save_mas_code para guardar el proyecto final.",
     tools=[save_mas_code]
 )
 
@@ -313,11 +324,11 @@ bucle_correccion = LoopAgent(
     sub_agents=[coder_agent, tester_agent],
     max_iterations=5 # Para evitar bucles infinitos 
 )
-
+last_error
 ## SequentialAgent
 root_agent = SequentialAgent(
     name="generador_bdi_completo",
-    sub_agents=[investigacion_paralela, bucle_correccion, saver_agent]
+    sub_agents=[agente_github, agente_rag, fusion_agent, bucle_correccion, saver_agent]
 )
 
 
