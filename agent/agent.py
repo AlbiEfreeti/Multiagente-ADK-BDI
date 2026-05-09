@@ -324,11 +324,11 @@ bucle_correccion = LoopAgent(
     sub_agents=[coder_agent, tester_agent],
     max_iterations=5 # Para evitar bucles infinitos 
 )
-last_error
+
 ## SequentialAgent
 root_agent = SequentialAgent(
     name="generador_bdi_completo",
-    sub_agents=[agente_github, agente_rag, fusion_agent, bucle_correccion, saver_agent]
+    sub_agents=[investigacion_paralela, fusion_agent, bucle_correccion, saver_agent]
 )
 
 
