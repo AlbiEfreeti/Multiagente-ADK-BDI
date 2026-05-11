@@ -268,16 +268,7 @@ agente_rag = LlmAgent(
     tools=[rag.search_local_docs]
 )
 
-##Barrera para antes de los agentes del loop agent##
-fusion_agent = LlmAgent(
-    name="Context_Fusion",
-    model=model,
-    output_key="context_ready",
-    instruction="""
-    Espera a que existan github_docs y local_docs.
-    Si existen, combínalos en un resumen útil.
-    """
-)
+
 
 ##Para el LoopAgent definimos a sus agentes##
 coder_agent = LlmAgent(
@@ -328,7 +319,7 @@ bucle_correccion = LoopAgent(
 ## SequentialAgent
 root_agent = SequentialAgent(
     name="generador_bdi_completo",
-    sub_agents=[investigacion_paralela, fusion_agent, bucle_correccion, saver_agent]
+    sub_agents=[investigacion_paralela, bucle_correccion, saver_agent]
 )
 
 
