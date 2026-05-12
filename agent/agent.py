@@ -48,13 +48,18 @@ def resolve_jason_command():
         return default_macos_path
 
     default_windows_paths = [
-        r"C:\Jason\bin\jason.bat",
+        r"C:\jason-bin-3.3.0\bin\jason",
         r"C:\Program Files\Jason\bin\jason.bat",
         r"C:\Program Files (x86)\Jason\bin\jason.bat",
     ]
-    for windows_path in default_windows_paths:
+    
+    manual_path = r"C:\jason-bin-3.3.0\bin\jason"
+
+    """ for windows_path in default_windows_paths:
         if Path(windows_path).exists():
-            return windows_path
+            return windows_path"""
+    if Path(manual_path).exists():
+        return manual_path
 
     return None
 
@@ -148,7 +153,8 @@ def test_mas_code(mas2j_code: str, agents_dict: dict, intento: int = 1) -> str:
             cwd=str(temp_dir),
             capture_output=True,
             text=True,
-            timeout=15
+            timeout=15,
+            shell=True
         )
         
         # Heurística simple para contar errores basándonos en STDERR y el código de retorno
